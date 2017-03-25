@@ -8,8 +8,9 @@ public class Spline{
 	public List<Vector3> positions;
 	public List<Vector3> rotations;
 
-	public Spline (int numCtrlPts) {
+	public Spline (int numCtrlPts, float time) {
 		positions = new List<Vector3>(numCtrlPts);
 		rotations = new List<Vector3>(numCtrlPts);
+		this.time = time;
 	}
 }
