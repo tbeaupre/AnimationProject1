@@ -61,11 +61,11 @@ public class SplineTraveler : MonoBehaviour {
 			{
 				// Split up the X, Y, and Z values of the control point
 				string[] vals = GetNextString().Split(',');
-				spline.positions.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
+				spline.poss.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 
 				// Split up the XRot, YRot, and ZRot values of the control point
 				vals = GetNextString().Split(',');
-				spline.rotations.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
+				spline.rots.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 			}
 			splines.Add (spline);
 		}
