@@ -1,9 +1,9 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Source\SplineTraveler.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Source\Spline.cs">
     <Files>
-      <File FileName="Assets\Source\Spline.cs" Line="14" Column="20" />
-      <File FileName="Assets\Source\SplineTraveler.cs" Line="77" Column="26" />
+      <File FileName="Assets\Source\Spline.cs" Line="15" Column="20" />
+      <File FileName="Assets\Source\SplineTraveler.cs" Line="13" Column="17" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
