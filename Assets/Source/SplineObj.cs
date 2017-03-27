@@ -27,7 +27,9 @@ public class SplineObj : MonoBehaviour {
 	{
 		for (int i = 0; i < spline.poss.Count; i++)
 		{
-			GameObject controlPointClone = Object.Instantiate(controlPoint, spline.poss[i], new Quaternion());
+			Quaternion rot = new Quaternion();
+			rot.SetFromToRotation(new Vector3(0,0,0), spline.rots[i]);
+			GameObject controlPointClone = Object.Instantiate(controlPoint, spline.poss[i], rot);
 		}
 	}
 }
