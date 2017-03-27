@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class SplineTraveler : MonoBehaviour {
 
+	public GameObject splineObjPrefab;
 	public string filePath; // The filepath to the spline data
-	public List<Spline> splines; // The splines described in the text file
+	public List<GameObject> splines; // The splines described in the text file
 	List<string> strData; // The strings of data in the text file
 	int strDataIter; // An iterator for cycling through the lines of the text file
 
@@ -20,14 +21,14 @@ public class SplineTraveler : MonoBehaviour {
 	}
 
 	// Read data from a new file
-	List<Spline> ReadFile () {
+	List<GameObject> ReadFile () {
 		Debug.Log(string.Format("Reading data from {0}", filePath));
 
 		// Check to see if file exists
 		if (!System.IO.File.Exists(@filePath))
 		{
 			Debug.Log("File Does Not Exist!");
-			return new List<Spline>();
+			return new List<GameObject>();
 		}
 
 		// Read the file and remove commented lines
@@ -47,7 +48,7 @@ public class SplineTraveler : MonoBehaviour {
 		// Record number of splines
 		int numSplines = int.Parse(GetNextString());
 		// Initialize list of splines based on number retrieved
-		List<Spline> splines = new List<Spline>(numSplines);
+		List<GameObject> splines = new List<GameObject>(numSplines);
 
 		// Repeat these operations for each spline in the file.
 		for (int i = 0; i < numSplines; i++)
@@ -67,7 +68,10 @@ public class SplineTraveler : MonoBehaviour {
 				vals = GetNextString().Split(',');
 				spline.rots.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 			}
-			splines.Add (spline);
+			GameObject splineObj = (GameObject) Instantiate(splineObjPrefab);
+			splineObj.GetComponent<SplineObj>().Initialize(spline);
+			splines.Add (splineObj);
+
 		}
 		Debug.Log("Successfully read file!");
 		return splines;
