@@ -25,6 +25,7 @@ public class SplineTraveler : MonoBehaviour {
 		{
 			curSplineIndex = 0;
 			curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
+			transform.position = curSpline.CalcPosAtTime(0);
 			timer = new Timer(curSpline.time);
 			done = false;
 		}
@@ -43,11 +44,13 @@ public class SplineTraveler : MonoBehaviour {
 			{
 				if (timerVal == -2) // If the animation has ended.
 				{
+					transform.position = curSpline.CalcPosAtTime(1);
 					// Move onto the next spline in the list.
 					curSplineIndex++;
 					if (curSplineIndex < splines.Count)
 					{
 						curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
+						transform.position = curSpline.CalcPosAtTime(0);
 						timer = new Timer(curSpline.time);
 					} else
 					{
