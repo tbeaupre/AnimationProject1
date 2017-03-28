@@ -6,21 +6,29 @@ using UnityEngine;
 public class SplineObj : MonoBehaviour {
 	public GameObject controlPoint;
 	Spline spline;
+	public float time;
 
 	// Use this for initialization
 	void Start () {
 		
 	}
 
-	public void Initialize (Spline spline)
+	public void Initialize (Spline spline, float time)
 	{
+		this.time = time;
 		this.spline = spline;
+		spline.CalcSplineDefinition(); // One time calculation for the tangents of the spline.
 		DrawControlPoints();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public Vector3 CalcPosAtTime(float t)
+	{
+		return spline.CalcPosAtTime(t);
 	}
 		
 	void DrawControlPoints()
@@ -30,6 +38,8 @@ public class SplineObj : MonoBehaviour {
 			Quaternion rot = new Quaternion();
 			rot.SetFromToRotation(new Vector3(0,0,0), spline.rots[i]);
 			GameObject controlPointClone = Object.Instantiate(controlPoint, spline.poss[i], rot);
+			Debug.Log(string.Format("Now displaying control point {0} at {1} with Euler rotations {2}.", i, spline.poss[i], spline.rots[i]));
 		}
+		Debug.Log("Successfully drew all control points!");
 	}
 }
