@@ -67,6 +67,7 @@ public class MyQuaternion
 
 		// Account for singularity at north pole
 		if (test > 0.499) {
+			Debug.Log("Singularity At North Pole!");
 			return new Vector3(
 				0,
 				Mathf.Rad2Deg * 2 * Mathf.Atan2(q.v.x, q.s),
@@ -74,6 +75,7 @@ public class MyQuaternion
 		}
 		// Account for singularity at south pole
 		if (test < -0.499) {
+			Debug.Log("Singularity At South Pole!");
 			return new Vector3(
 				0,
 				Mathf.Rad2Deg * -2 * Mathf.Atan2(q.v.x, q.s),
@@ -115,21 +117,29 @@ public class MyQuaternion
 		MyQuaternion uq1 = Normalize(q1);
 		MyQuaternion uq2 = Normalize(q2);
 
+		MyQuaternion result;
+
 		float dot = Dot(uq1, uq2);
 
-		if (dot < 0)
+		if (dot < 0.0f)
 		{
-			uq2 *= -1;
+			uq2 = uq2 * -1;
+			dot = -dot;
 		}
 
-		float theta = Mathf.Acos(Dot(uq1, uq2));
+		Mathf.Clamp(dot, -1, 1);
+
+		float theta0 = Mathf.Acos(dot);
+		float theta = theta0 * u;
 
 		if (Mathf.Sin(theta) == 0)
 		{
-			return uq1 + ((uq2 - uq1) * u);
+			result = uq1 + ((uq2 - uq1) * u);
+			result = Normalize(result);
+			return result;
 		}
 
-		MyQuaternion result = (uq1 * (Mathf.Sin((1 - u) * theta) / Mathf.Sin(theta))) + (uq2 * (Mathf.Sin(u * theta) / Mathf.Sin(theta)));
+		result = (uq1 * (Mathf.Sin((1 - u) * theta) / Mathf.Sin(theta))) + (uq2 * (Mathf.Sin(u * theta) / Mathf.Sin(theta)));
 		result = Normalize(result);
 		return result;
 	}
