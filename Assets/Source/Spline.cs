@@ -24,7 +24,10 @@ public class Spline{
 
 	public void CalcQuaternions()
 	{
+		quats = new List<MyQuaternion>(numCtrlPts);
+		foreach (Vector3 rot in rots)
 		{
+			quats.Add(new MyQuaternion(rot));
 		}
 	}
 
