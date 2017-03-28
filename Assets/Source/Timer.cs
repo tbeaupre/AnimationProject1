@@ -15,14 +15,21 @@ public class Timer
 		time = timeForMove;
 		startTime = Time.time;
 		nextTime = startTime;
-		endTime = startTime + timeForMove;
+		endTime = startTime + time;
 	}
 
 	public float Update()
 	{
 		if (Time.time >= nextTime)
 		{
-			return ((Time.time - startTime) / time);
+			if (Time.time > endTime) // The time of the animation has ended.
+			{
+				return -2;
+			} else
+			{
+				nextTime += interval;
+				return ((Time.time - startTime) / time);
+			}
 		} else
 		{
 			return -1; // Dummy value so the traveler doesn't change position.

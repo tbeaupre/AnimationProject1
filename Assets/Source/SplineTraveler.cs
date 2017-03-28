@@ -9,10 +9,13 @@ public class SplineTraveler : MonoBehaviour {
 	string currentFilePath; // Tracker so that the program recalculates when a new file is selected.
 	public List<GameObject> splines; // The splines described in the text file.
 	List<string> strData; // The strings of data in the text file.
+	int strDataIter; // An iterator for cycling through the lines of the text file.
+
 	int curSplineIndex;
 	SplineObj curSpline;
 
 	Timer timer;
+	bool done = false;
 
 	// Use this for initialization
 	void Start () {
@@ -23,6 +26,7 @@ public class SplineTraveler : MonoBehaviour {
 			curSplineIndex = 0;
 			curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
 			timer = new Timer(curSpline.time);
+			done = false;
 		}
 	}
 	
@@ -32,10 +36,30 @@ public class SplineTraveler : MonoBehaviour {
 		{
 			ReadFile();
 		}
-		float timerVal = timer.Update();
-		if (timerVal != -1)
+		if (!done)
 		{
-			transform.position = curSpline.CalcPosAtTime(timerVal);
+			float timerVal = timer.Update(); // Find the time from 0 to 1 representing the traveler's position on the spline.
+			if (timerVal != -1) // If a position change is necessary.
+			{
+				if (timerVal == -2) // If the animation has ended.
+				{
+					// Move onto the next spline in the list.
+					curSplineIndex++;
+					if (curSplineIndex < splines.Count)
+					{
+						curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
+						timer = new Timer(curSpline.time);
+					} else
+					{
+						done = true;
+						Debug.Log("Done!");
+					}
+				} else
+				{
+					transform.position = curSpline.CalcPosAtTime(timerVal);
+					Debug.Log(string.Format("Now Moving to t={0}, at location: {1}.", timerVal, transform.position));
+				}
+			}
 		}
 	}
 
@@ -49,7 +73,6 @@ public class SplineTraveler : MonoBehaviour {
 			Debug.Log("File Does Not Exist!");
 			return new List<GameObject>();
 		}
-		int strDataIter; // An iterator for cycling through the lines of the text file.
 
 		// Read the file and remove commented lines
 		string[] lines = System.IO.File.ReadAllLines(@filePath);
@@ -63,10 +86,10 @@ public class SplineTraveler : MonoBehaviour {
 				strData.Add (s);
 			}
 		}
-		Debug.Log(string.Format("file contains {0} lines of data.", strData.Count));
+		//Debug.Log(string.Format("file contains {0} lines of data.", strData.Count));
 	
 		// Record number of splines
-		int numSplines = int.Parse(GetNextString(strDataIter));
+		int numSplines = int.Parse(GetNextString());
 		// Initialize list of splines based on number retrieved
 		List<GameObject> splines = new List<GameObject>(numSplines);
 
@@ -74,19 +97,19 @@ public class SplineTraveler : MonoBehaviour {
 		for (int i = 0; i < numSplines; i++)
 		{
 			// Determine the number of control points for this spline and initialize it
-			int numCtrlPts = int.Parse(GetNextString(strDataIter));
-			float time = float.Parse(GetNextString(strDataIter));
+			int numCtrlPts = int.Parse(GetNextString());
+			float time = float.Parse(GetNextString());
 			Spline spline = new Spline(numCtrlPts);
 
 			// Repeat these operations for each control point in the spline
 			for (int j = 0; j < numCtrlPts; j++)
 			{
 				// Split up the X, Y, and Z values of the control point
-				string[] vals = GetNextString(strDataIter).Split(',');
+				string[] vals = GetNextString().Split(',');
 				spline.poss.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 
 				// Split up the XRot, YRot, and ZRot values of the control point
-				vals = GetNextString(strDataIter).Split(',');
+				vals = GetNextString().Split(',');
 				spline.rots.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 			}
 			GameObject splineObj = (GameObject) Instantiate(splineObjPrefab);
@@ -98,9 +121,9 @@ public class SplineTraveler : MonoBehaviour {
 	}
 
 	// Retrieves the next string in the list of data strings
-	string GetNextString(int strDataIter) {
+	string GetNextString() {
 		string s = strData[strDataIter];
-		Debug.Log(string.Format("Retrieving line {0} of {1} : " + s, strDataIter + 1, strData.Count));
+		//Debug.Log(string.Format("Retrieving line {0} of {1} : " + s, strDataIter + 1, strData.Count));
 		strDataIter++;
 		return s;
 	}
