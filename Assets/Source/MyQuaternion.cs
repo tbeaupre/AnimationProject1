@@ -69,8 +69,8 @@ public class MyQuaternion
 		if (test > 0.499) {
 			Debug.Log("Singularity At North Pole!");
 			return new Vector3(
-				0,
 				Mathf.Rad2Deg * 2 * Mathf.Atan2(q.v.x, q.s),
+				0,
 				90);
 		}
 		// Account for singularity at south pole
@@ -117,30 +117,41 @@ public class MyQuaternion
 		MyQuaternion uq1 = Normalize(q1);
 		MyQuaternion uq2 = Normalize(q2);
 
-		MyQuaternion result;
+		MyQuaternion result = uq1;
+		// Calculate angle between them.
+		float cosHalfTheta = uq1.s * uq2.s + uq1.v.x * uq2.v.x + uq1.v.y * uq2.v.y + uq1.v.z * uq2.v.z;
 
-		float dot = Dot(uq1, uq2);
-
-		if (dot < 0.0f)
+		// if qa=qb or qa=-qb then theta = 0 and we can return qa
+		if (Mathf.Abs(cosHalfTheta) >= 1.0)
 		{
-			uq2 = uq2 * -1;
-			dot = -dot;
-		}
-
-		Mathf.Clamp(dot, -1, 1);
-
-		float theta0 = Mathf.Acos(dot);
-		float theta = theta0 * u;
-
-		if (Mathf.Sin(theta) == 0)
-		{
-			result = uq1 + ((uq2 - uq1) * u);
-			result = Normalize(result);
 			return result;
 		}
 
-		result = (uq1 * (Mathf.Sin((1 - u) * theta) / Mathf.Sin(theta))) + (uq2 * (Mathf.Sin(u * theta) / Mathf.Sin(theta)));
-		result = Normalize(result);
+		if (cosHalfTheta < 0) {
+			uq2 = uq2 * -1;
+			cosHalfTheta = -cosHalfTheta;
+		}
+
+		// Calculate temporary values.
+		float halfTheta = Mathf.Acos(cosHalfTheta);
+		float sinHalfTheta = Mathf.Sqrt(1.0f - cosHalfTheta * cosHalfTheta);
+		// if theta = 180 degrees then result is not fully defined
+		// we could rotate around any axis normal to qa or qb
+		if (Mathf.Abs(sinHalfTheta) < 0.001){ // fabs is floating point absolute
+			result.s = (uq1.s * 0.5f + uq2.s * 0.5f);
+			result.v.x = (uq1.v.x * 0.5f + uq2.v.x * 0.5f);
+			result.v.y = (uq1.v.y * 0.5f + uq2.v.y * 0.5f);
+			result.v.z = (uq1.v.z * 0.5f + uq2.v.z * 0.5f);
+			return result;
+		}
+		float ratioA = Mathf.Sin((1 - u) * halfTheta) / sinHalfTheta;
+		float ratioB = Mathf.Sin(u * halfTheta) / sinHalfTheta; 
+		//calculate Quaternion.
+		result.s = (uq1.s * ratioA + uq2.s * ratioB);
+		result.v.x = (uq1.v.x * ratioA + uq2.v.x * ratioB);
+		result.v.y = (uq1.v.y * ratioA + uq2.v.y * ratioB);
+		result.v.z = (uq1.v.z * ratioA + uq2.v.z * ratioB);
+		Debug.Log(string.Format("Slerp from [{0}, {1}] to [{2}, {3}] at t = {4} :: [{5}, {6}]", q1.s, q1.v, q2.s, q2.v, u, result.s, result.v));
 		return result;
 	}
 
