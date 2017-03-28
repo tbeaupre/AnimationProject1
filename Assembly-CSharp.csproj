@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Source\MyQuaternion.cs" />
      <Compile Include="Assets\Source\Spline.cs" />
      <Compile Include="Assets\Source\SplineObj.cs" />
      <Compile Include="Assets\Source\SplineTraveler.cs" />
