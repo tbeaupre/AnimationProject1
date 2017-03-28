@@ -71,7 +71,6 @@ public class SplineObj : MonoBehaviour {
 		for (int i = 0; i < spline.poss.Count; i++)
 		{
 			Quaternion rot = new Quaternion();
-			rot.SetFromToRotation(new Vector3(0,0,0), spline.rots[i]);
 			GameObject controlPointClone = Object.Instantiate(controlPoint, spline.poss[i], rot);
 			Debug.Log(string.Format("Now displaying control point {0} at {1} with Euler rotations {2}.", i, spline.poss[i], spline.rots[i]));
 		}

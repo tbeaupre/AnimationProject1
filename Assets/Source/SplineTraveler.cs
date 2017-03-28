@@ -5,9 +5,10 @@ using UnityEngine;
 public class SplineTraveler : MonoBehaviour {
 
 	public GameObject splineObjPrefab;
+	public GameObject travelPointPrefab;
 	public string filePath; // The filepath to the spline data.
-	string currentFilePath; // Tracker so that the program recalculates when a new file is selected.
-	public List<GameObject> splines; // The splines described in the text file.
+	static string currentFilePath; // Tracker so that the program recalculates when a new file is selected.
+	static List<GameObject> splines; // The splines described in the text file.
 	List<string> strData; // The strings of data in the text file.
 	int strDataIter; // An iterator for cycling through the lines of the text file.
 
@@ -19,9 +20,10 @@ public class SplineTraveler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		currentFilePath = filePath;
-
-		splines = ReadFile();
+		if (filePath != currentFilePath)
+		{
+			ReadFile();
+		}
 		if (splines.Count > 0)
 		{
 			curSplineIndex = 0;
@@ -63,6 +65,11 @@ public class SplineTraveler : MonoBehaviour {
 				{
 					transform.position = curSpline.CalcPosAtTime(timerVal);
 					transform.eulerAngles = curSpline.CalcRotAtTime(timerVal);
+
+					Quaternion rot = new Quaternion();
+					rot.eulerAngles = transform.eulerAngles;
+					GameObject travelPointClone = Object.Instantiate(travelPointPrefab, transform.position, rot);
+
 					//Debug.Log(string.Format("Now Moving to t={0}, at location: {1} with rotation: {2}.", timerVal, transform.position, transform.eulerAngles));
 				}
 			}
@@ -70,15 +77,16 @@ public class SplineTraveler : MonoBehaviour {
 	}
 
 	// Read data from a new file
-	List<GameObject> ReadFile () {
+	void ReadFile () {
 		Debug.Log(string.Format("Reading data from {0}", filePath));
 
 		// Check to see if file exists
 		if (!System.IO.File.Exists(@filePath))
 		{
 			Debug.Log("File Does Not Exist!");
-			return new List<GameObject>();
+			splines = new List<GameObject>();
 		}
+		currentFilePath = filePath;
 
 		// Read the file and remove commented lines
 		string[] lines = System.IO.File.ReadAllLines(@filePath);
@@ -97,7 +105,7 @@ public class SplineTraveler : MonoBehaviour {
 		// Record number of splines
 		int numSplines = int.Parse(GetNextString());
 		// Initialize list of splines based on number retrieved
-		List<GameObject> splines = new List<GameObject>(numSplines);
+		splines = new List<GameObject>(numSplines);
 
 		// Repeat these operations for each spline in the file.
 		for (int i = 0; i < numSplines; i++)
@@ -123,7 +131,6 @@ public class SplineTraveler : MonoBehaviour {
 			splines.Add (splineObj);
 		}
 		Debug.Log("Successfully read file!");
-		return splines;
 	}
 
 	// Retrieves the next string in the list of data strings
