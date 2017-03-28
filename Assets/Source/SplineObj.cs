@@ -50,11 +50,18 @@ public class SplineObj : MonoBehaviour {
 			return spline.rots[0];
 		} else
 		{
-			MyQuaternion q1 = new MyQuaternion(spline.rots[i]);
-			MyQuaternion q2 = new MyQuaternion(spline.rots[i = 1]);
+			if (spline.rots[i] == spline.rots[i + 1])
+			{
+				return spline.rots[i];
+			}
 
-			MyQuaternion result = MyQuaternion.Slerp(q1, q2, u);
-			return result.ConvertToEuler();
+			MyQuaternion q1 = new MyQuaternion(spline.rots[i]);
+			MyQuaternion q2 = new MyQuaternion(spline.rots[i + 1]);
+
+			MyQuaternion q3 = MyQuaternion.Slerp(q1, q2, u);
+			Vector3 result = q3.ConvertToEuler();
+			Debug.Log(string.Format("Rotation at time {0} : {1}", t, result));
+			return result;
 		}
 	}
 		
