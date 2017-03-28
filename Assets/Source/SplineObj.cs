@@ -31,7 +31,7 @@ public class SplineObj : MonoBehaviour {
 		return spline.CalcPosAtTime(t);
 	}
 
-	public Vector3 CalcRotAtTime(float t)
+	public MyQuaternion CalcRotAtTime(float t)
 	{
 		float u = t * (spline.numCtrlPts - 1); // u is now a value between 0 and the last control point.
 		int i = Mathf.FloorToInt(u); // i now represents the subsection of the spline to use.
@@ -39,28 +39,28 @@ public class SplineObj : MonoBehaviour {
 
 		if (t > 1 || t < 0) // Check to make sure the time is valid.
 		{
-			return new Vector3(0, 0, 0);
+			return new MyQuaternion(0, 0, 0, 0);
 		}
 		if (t == 1) // Check corner cases for 0 and 1.
 		{
-			return spline.rots[spline.numCtrlPts - 1];
+			return new MyQuaternion(spline.rots[spline.numCtrlPts - 1]);
 		}
 		if (t == 0)
 		{
-			return spline.rots[0];
+			return new MyQuaternion(spline.rots[0]);
 		} else
 		{
 			if (spline.rots[i] == spline.rots[i + 1])
 			{
-				return spline.rots[i];
+				Debug.Log(string.Format("Rotation at time {0}(i = {1}, u = {2}) : {3}", t, i, u, spline.rots[i]));
+				return new MyQuaternion(spline.rots[i]);
 			}
 
 			MyQuaternion q1 = new MyQuaternion(spline.rots[i]);
 			MyQuaternion q2 = new MyQuaternion(spline.rots[i + 1]);
 
-			MyQuaternion q3 = MyQuaternion.Slerp(q1, q2, u);
-			Vector3 result = q3.ConvertToEuler();
-			Debug.Log(string.Format("Rotation at time {0} : {1}", t, result));
+			MyQuaternion result = MyQuaternion.Slerp(q1, q2, u);
+			Debug.Log(string.Format("Rotation at time {0}(i = {1}, u = {2}) : {3}{4}", t, i, u, result.s, result.v));
 			return result;
 		}
 	}

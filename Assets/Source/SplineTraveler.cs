@@ -51,7 +51,7 @@ public class SplineTraveler : MonoBehaviour {
 					{
 						curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
 						transform.position = curSpline.CalcPosAtTime(0);
-						transform.eulerAngles = curSpline.CalcRotAtTime(0);
+						transform.eulerAngles = curSpline.CalcRotAtTime(0).ConvertToEuler();
 						timer = new Timer(curSpline.time);
 					} else
 					{
@@ -61,8 +61,8 @@ public class SplineTraveler : MonoBehaviour {
 				} else
 				{
 					transform.position = curSpline.CalcPosAtTime(timerVal);
-					transform.eulerAngles = curSpline.CalcRotAtTime(timerVal);
-					Debug.Log(string.Format("Now Moving to t={0}, at location: {1} with rotation: {2}.", timerVal, transform.position, transform.eulerAngles));
+					transform.eulerAngles = curSpline.CalcRotAtTime(timerVal).ConvertToEuler();
+					//Debug.Log(string.Format("Now Moving to t={0}, at location: {1} with rotation: {2}.", timerVal, transform.position, transform.eulerAngles));
 				}
 			}
 		}
