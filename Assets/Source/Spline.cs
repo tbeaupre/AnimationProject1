@@ -7,12 +7,25 @@ public class Spline{
 	public List<Vector3> poss;
 	public List<Vector3> rots;
 	public List<Vector3> tans;
+	public List<MyQuaternion> quats;
 	public int numCtrlPts;
 
 	public Spline (int numCtrlPts) {
 		this.numCtrlPts = numCtrlPts;
 		poss = new List<Vector3>(numCtrlPts);
 		rots = new List<Vector3>(numCtrlPts);
+	}
+
+	public void Init()
+	{
+		CalcSplineDefinition();
+		CalcQuaternions();
+	}
+
+	public void CalcQuaternions()
+	{
+		{
+		}
 	}
 
 	public void CalcSplineDefinition()
@@ -29,6 +42,7 @@ public class Spline{
 		} else
 		{
 			// Do the normal calculations
+			tans = new List<Vector3>();
 			CalcInitTan();
 			for (int i = 1; i < numCtrlPts - 1; i++)
 			{
@@ -40,7 +54,6 @@ public class Spline{
 
 	void CalcInitTan()
 	{
-		tans = new List<Vector3>();
 		tans.Add((poss[1] - (poss[2] - poss[1]) - poss[0]) / 2);
 	}
 		
@@ -80,5 +93,36 @@ public class Spline{
 		((u3 - (2 * u2) + u) * v0) +
 		(((-2 * u3) + (3 * u2)) * p1) +
 		((u3 - u2) * v1));
+	}
+
+	public Vector3 CalcRotAtTime(float t)
+	{
+		float u = t * (numCtrlPts - 1); // u is now a value between 0 and the last control point.
+		int i = Mathf.FloorToInt(u); // i now represents the subsection of the spline to use.
+		u = u - i; // u now represents the u of the subsection of the spline.
+
+		if (t > 1 || t < 0) // Check to make sure the time is valid.
+		{
+			return new Vector3(0, 0, 0);
+		}
+		if (t == 1) // Check corner cases for 0 and 1.
+		{
+			return rots[numCtrlPts - 1];
+		}
+		if (t == 0)
+		{
+			return rots[0];
+		} else
+		{
+			if (rots[i] == rots[i + 1])
+			{
+				Debug.Log(string.Format("Rotation at time {0}(i = {1}, u = {2}) : {3}", t, i, u, rots[i]));
+				return rots[i];
+			}
+			MyQuaternion q = MyQuaternion.Slerp(quats[i], quats[i + 1], u);
+			Vector3 result = MyQuaternion.ConvertToEuler(q);
+			Debug.Log(string.Format("Rotation at time {0}(i = {1}, u = {2}) : {3}", t, i, u, result));
+			return result;
+		}
 	}
 }
