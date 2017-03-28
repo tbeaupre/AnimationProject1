@@ -4,58 +4,90 @@ using UnityEngine;
 
 public class MyQuaternion
 {
-	public float s;
-	public Vector3 v;
+	float s;
+	Vector3 v;
+
+	public float GetS()
+	{
+		return this.s;
+	}
+
+	public Vector3 GetV()
+	{
+		return this.v;
+	}
+
+	public void SetS(float s)
+	{
+		this.s = s;
+	}
+
+	public void SetV(Vector3 v)
+	{
+		this.v = v;
+	}
 
 	public MyQuaternion (float w, float x, float y, float z)
 	{
-		this.s = w;
-		this.v = new Vector3(x, y, z);
+		SetS(w);
+		SetV(new Vector3(x, y, z));
 	}
 
 	public MyQuaternion (float s, Vector3 v)
 	{
-		this.s = s;
-		this.v = v;
+		SetS(s);
+		SetV(v);
 	}
 
 	public MyQuaternion (Vector3 euler)
 	{
-		float t0 = Mathf.Cos(Mathf.Deg2Rad * euler[1]) * 0.5f;
-		float t1 = Mathf.Sin(Mathf.Deg2Rad * euler[1]) * 0.5f;
-		float t2 = Mathf.Cos(Mathf.Deg2Rad * euler[2]) * 0.5f;
-		float t3 = Mathf.Sin(Mathf.Deg2Rad * euler[2]) * 0.5f;
-		float t4 = Mathf.Cos(Mathf.Deg2Rad * euler[0]) * 0.5f;
-		float t5 = Mathf.Sin(Mathf.Deg2Rad * euler[0]) * 0.5f;
+		float xRad = Mathf.Deg2Rad * euler.x;
+		float yRad = Mathf.Deg2Rad * euler.y;
+		float zRad = Mathf.Deg2Rad * euler.z;
 
-		this.s = t0 * t2 * t4 + t1 * t3 * t5;
-		this.v = new Vector3(
-			t0 * t3 * t4 - t1 * t2 * t5,
-			t0 * t2 * t5 + t1 * t3 * t4,
-			t1 * t2 * t4 - t0 * t3 * t5);
+		float c1 = Mathf.Cos(yRad / 2);
+		float c2 = Mathf.Cos(zRad / 2);
+		float c3 = Mathf.Cos(xRad / 2);
+		float s1 = Mathf.Sin(yRad / 2);
+		float s2 = Mathf.Sin(zRad / 2);
+		float s3 = Mathf.Sin(xRad / 2);
+
+		SetS(c1 * c2 * c3 - s1 * s2 * s3);
+		SetV(new Vector3(
+			s1 * s2 * c3 + c1 * c2 * s3,
+			s1 * c2 * c3 + c1 * s2 * s3,
+			c1 * s2 * c3 - s1 * c2 * s3));
 	}
 
-	public Vector3 ConvertToEuler ()
+	static public Vector3 ConvertToEuler (MyQuaternion q0)
 	{
-		MyQuaternion q = Normalize(this);
-		Vector3 result = new Vector3();
+		MyQuaternion q = Normalize(q0);
 
-		float y2 = q.v[1] * q.v[1];
+		float test = q.v.x * q.v.y + q.v.z * q.s;
 
-		float t2 = 2.0f * (q.s * q.v[1] - q.v[2] * q.v[0]);
-		t2 = Mathf.Min(t2, 1);
-		t2 = Mathf.Max(t2, -1);
-		result[0] = Mathf.Rad2Deg * Mathf.Asin(t2);
+		// Account for singularity at north pole
+		if (test > 0.499) {
+			return new Vector3(
+				0,
+				Mathf.Rad2Deg * 2 * Mathf.Atan2(q.v.x, q.s),
+				90);
+		}
+		// Account for singularity at south pole
+		if (test < -0.499) {
+			return new Vector3(
+				0,
+				Mathf.Rad2Deg * -2 * Mathf.Atan2(q.v.x, q.s),
+				-90);
+		}
+		// Standard calculation
+		float x2 = q.v.x*q.v.x;
+		float y2 = q.v.y*q.v.y;
+		float z2 = q.v.z*q.v.z;
 
-		float t3 = 2.0f * (q.s * q.v[2] + q.v[0] * q.v[1]);
-		float t4 = 1.0f - 2.0f * (y2 + q.v[2] * q.v[2]);
-		result[1] = Mathf.Rad2Deg * Mathf.Atan2(t3, t4);
-
-		float t0 = 2.0f * (q.s * q.v[0] + q.v[1] * q.v[2]);
-		float t1 = 1.0f - 2.0f * (q.v[0] * q.v[0] + y2);
-		result[2] = Mathf.Rad2Deg * Mathf.Atan2(t0, t1);
-
-		return result;
+		return new Vector3(
+			Mathf.Rad2Deg * Mathf.Atan2(2 * q.v.x * q.s - 2 * q.v.y * q.v.z, 1 - 2 * x2 - 2 * z2),
+			Mathf.Rad2Deg * Mathf.Atan2(2 * q.v.y * q.s - 2 * q.v.x * q.v.z, 1 - 2 * y2 - 2 * z2),
+			Mathf.Rad2Deg * Mathf.Asin(2 * test));
 	}
 
 	static public MyQuaternion operator * (MyQuaternion q, float scalar)
@@ -104,7 +136,7 @@ public class MyQuaternion
 
 	static public float Length (MyQuaternion q)
 	{
-		return Mathf.Sqrt((q.s * q.s) + (q.v[0] * q.v[0]) + (q.v[1] * q.v[1]) + (q.v[2] * q.v[2]));
+		return Mathf.Sqrt((q.s * q.s) + (q.v.x * q.v.x) + (q.v.y * q.v.y) + (q.v.z * q.v.z));
 	}
 
 	static public MyQuaternion Normalize (MyQuaternion q)
@@ -115,9 +147,8 @@ public class MyQuaternion
 	static public MyQuaternion Inverse (MyQuaternion q)
 	{
 		MyQuaternion result = q;
-		result.v *= -1;
-		result = Normalize(result);
-		return result;
+		result.SetV(result.v * -1);
+		return  result * ((1/Length(q)) * (1/Length(q)));
 	}
 }
 
