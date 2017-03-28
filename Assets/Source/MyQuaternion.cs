@@ -70,10 +70,24 @@ public class MyQuaternion
 		return new MyQuaternion(q1.s + q2.s, q1.v + q2.v);
 	}
 
-	public MyQuaternion Slerp (MyQuaternion q1, MyQuaternion q2, float u)
+	static public float Dot (MyQuaternion q1, MyQuaternion q2)
 	{
-		return new MyQuaternion(0, 0, 0, 0);
-		//return (Mathf.Sin(0));
+		return (q1.s * q2.s + Vector3.Dot(q1.v, q2.v));
+	}
+
+	static public MyQuaternion Slerp (MyQuaternion q1, MyQuaternion q2, float u)
+	{
+		MyQuaternion uq1 = q1 * (1 / Length(q1));
+		MyQuaternion uq2 = q2 * (1 / Length(q2));
+
+		float theta = Mathf.Acos(Dot(uq1, uq2));
+
+		return (uq1 * (Mathf.Sin((1 - u) * theta) / Mathf.Sin(theta))) + (uq2 * (Mathf.Sin(u * theta) / Mathf.Sin(theta)));
+	}
+
+	static public float Length (MyQuaternion q)
+	{
+		return Mathf.Sqrt(q.s * q.s + q.v[0] * q.v[0] + q.v[1] * q.v[1] + q.v[2] * q.v[2]);
 	}
 }
 

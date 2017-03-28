@@ -30,6 +30,33 @@ public class SplineObj : MonoBehaviour {
 	{
 		return spline.CalcPosAtTime(t);
 	}
+
+	public Vector3 CalcRotAtTime(float t)
+	{
+		float u = t * (spline.numCtrlPts - 1); // u is now a value between 0 and the last control point.
+		int i = Mathf.FloorToInt(u); // i now represents the subsection of the spline to use.
+		u = u - i; // u now represents the u of the subsection of the spline.
+
+		if (t > 1 || t < 0) // Check to make sure the time is valid.
+		{
+			return new Vector3(0, 0, 0);
+		}
+		if (t == 1) // Check corner cases for 0 and 1.
+		{
+			return spline.rots[spline.numCtrlPts - 1];
+		}
+		if (t == 0)
+		{
+			return spline.rots[0];
+		} else
+		{
+			MyQuaternion q1 = new MyQuaternion(spline.rots[i]);
+			MyQuaternion q2 = new MyQuaternion(spline.rots[i = 1]);
+
+			MyQuaternion result = MyQuaternion.Slerp(q1, q2, u);
+			return result.ConvertToEuler();
+		}
+	}
 		
 	void DrawControlPoints()
 	{

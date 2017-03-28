@@ -7,7 +7,7 @@ public class Spline{
 	public List<Vector3> poss;
 	public List<Vector3> rots;
 	public List<Vector3> tans;
-	int numCtrlPts;
+	public int numCtrlPts;
 
 	public Spline (int numCtrlPts) {
 		this.numCtrlPts = numCtrlPts;
