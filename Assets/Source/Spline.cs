@@ -9,6 +9,7 @@ public class Spline{
 	public List<Vector3> tans;
 	public List<MyQuaternion> quats;
 	public int numCtrlPts;
+	public List<Vector3> bSplinePoss;
 
 	public Spline (int numCtrlPts) {
 		this.numCtrlPts = numCtrlPts;
@@ -16,10 +17,23 @@ public class Spline{
 		rots = new List<Vector3>(numCtrlPts);
 	}
 
-	public void Init()
+	public void Init(float time, bool pre)
 	{
-		CalcSplineDefinition();
+		if (pre)
+		{
+			PreCalculateBSplinePos(time);
+		}
+		CalcCRSplineTans();
 		CalcQuaternions();
+	}
+
+	public void PreCalculateBSplinePos(float time)
+	{
+		bSplinePoss = new List<Vector3>();
+		for (int i = 0; i < 30 * time; i++)
+		{
+			bSplinePoss.Add(ApproxPosAtTime(i / (30 * time), 2));
+		}
 	}
 
 	public void CalcQuaternions()
@@ -31,13 +45,7 @@ public class Spline{
 		}
 	}
 
-	public void CalcSplineDefinition()
-	{
-		CalcTans();
-		Debug.Log("Successfully Calculated Spline Definition");
-	}
-
-	public void CalcTans()
+	public void CalcCRSplineTans()
 	{
 		if (numCtrlPts <= 2)
 		{
@@ -97,6 +105,68 @@ public class Spline{
 		(((-2 * u3) + (3 * u2)) * p1) +
 		((u3 - u2) * v1));
 	}
+
+	public List<int> CalcKnotVector(int k)
+	{
+		List<int> result = new List<int>(numCtrlPts + k);
+		for (int i = 0; i < numCtrlPts + k; i++)
+		{
+			result.Add(i);
+		}
+		Debug.Log(string.Format("Knot Vector: {0} to {1}", result[0], result[result.Count - 1]));
+		return result;
+	}
+
+	public Vector3 ApproxPosAtTime(float t, int k)
+	{
+		if (t > 1 || t < 0) // Check to make sure the time is valid.
+		{
+			return new Vector3(0, 0, 0);
+		}
+		// Reparameterize the t value to [0, numCtrlPts]
+		float x = t * (numCtrlPts - 1);
+		int l = Mathf.FloorToInt(x); // i now represents the subsection of the spline to use.
+		List<int> knotVector = CalcKnotVector(k);
+
+		Vector3 result = new Vector3();
+		for (int i = Mathf.Max(0, l - k); i < (numCtrlPts - 1); i++)
+		{
+			result += poss[i] * Basis(ref knotVector, i, k, x);
+		}
+		return result;
+	}
+
+	//public float DeBoor(ref List<int> u, )
+
+	public float Basis(ref List<int> t, int i, int k, float x)
+	{
+		Debug.Log(string.Format("Basis(i={0}, k={1}, x={2}))\nMax Knot Vector Index: {3}\nMin Knot Vector Index: {4}", i, k, x, (i + k + 1), i));
+		if (k <= 0)
+		{
+			if (x >= t[i] && x < t[i + 1])
+			{
+				return 1.0f;
+			} else
+			{
+				return 0.0f;
+			}
+		} else
+		{
+			return (((x - t[i]) / (t[i + k] - t[i])) * Basis(ref t, i, k - 1, x)) + (((t[i + k + 1] - x) / (t[i + k + 1] - t[i + 1])) * Basis(ref t, i + 1, k - 1, x));
+		}
+	}
+
+//	public Vector3 CalcPosAlongBSpline(int i, float u)
+//	{
+//		float u2 = u * u;
+//		float u3 = u * u * u;
+//		Vector3 p0 = poss[i];
+//		Vector3 p1 = poss[i + 1];
+//		Vector3 p2 = poss[i + 2];
+//		Vector3 p3 = poss[i + 3];
+//
+//		return (p0 * (-u3 + (3 * u2) - (3 * u) + 1) + p1 * ((3 * u3) - (6 * u2) + 4) + p2 * ((-3 * u3) + (3 * u2) + (3 * u) + 1) + (p3 * u3)) / 6;
+//	}
 
 	public Vector3 CalcRotAtTime(float t)
 	{

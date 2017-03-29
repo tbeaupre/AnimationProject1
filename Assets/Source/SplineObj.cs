@@ -13,11 +13,11 @@ public class SplineObj : MonoBehaviour {
 		
 	}
 
-	public void Initialize (Spline spline, float time)
+	public void Initialize (Spline spline, float time, bool pre)
 	{
 		this.time = time;
 		this.spline = spline;
-		spline.Init(); // Initialize the spline.
+		spline.Init(time, pre); // Initialize the spline.
 		DrawControlPoints();
 	}
 	
@@ -26,9 +26,21 @@ public class SplineObj : MonoBehaviour {
 		
 	}
 
-	public Vector3 CalcPosAtTime(float t)
+	public Vector3 CalcPosAtTime(float t, bool approx, bool pre)
 	{
-		return spline.CalcPosAtTime(t);
+		if (approx)
+		{
+			if (pre)
+			{
+				return spline.bSplinePoss[(int)(t * 30 * time)];
+			} else
+			{
+				return spline.ApproxPosAtTime(t, 2);
+			}
+		} else
+		{
+			return spline.CalcPosAtTime(t);
+		}
 	}
 
 	public Vector3 CalcRotAtTime(float t)

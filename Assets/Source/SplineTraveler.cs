@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SplineTraveler : MonoBehaviour {
+	const int NO_REDRAW = -1;
+	const int END_OF_SPLINE = -2;
 
+	public bool preCalculateBSpline;
 	public GameObject splineObjPrefab;
 	public GameObject travelPointPrefab;
 	public string filePath; // The filepath to the spline data.
@@ -17,6 +20,7 @@ public class SplineTraveler : MonoBehaviour {
 
 	Timer timer;
 	bool done = false;
+	bool approx = true; // Flag for whether or not the traveler has done the b-spline pass.
 
 	// Use this for initialization
 	void Start () {
@@ -26,12 +30,16 @@ public class SplineTraveler : MonoBehaviour {
 		}
 		if (splines.Count > 0)
 		{
-			curSplineIndex = 0;
-			curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
-			transform.position = curSpline.CalcPosAtTime(0);
-			timer = new Timer(curSpline.time);
-			done = false;
+			StartAnimation();
 		}
+	}
+
+	void StartAnimation()
+	{
+		curSplineIndex = 0;
+		curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
+		SetTransforms(0);
+		timer = new Timer(curSpline.time);
 	}
 	
 	// Update is called once per frame
@@ -43,28 +51,25 @@ public class SplineTraveler : MonoBehaviour {
 		if (!done)
 		{
 			float timerVal = timer.Update(); // Find the time from 0 to 1 representing the traveler's position on the spline.
-			if (timerVal != -1) // If a position change is necessary.
+			if (timerVal != NO_REDRAW) // If a position change is necessary.
 			{
-				if (timerVal == -2) // If the animation has ended.
+				if (timerVal == END_OF_SPLINE) // If the animation has ended.
 				{
-					transform.position = curSpline.CalcPosAtTime(1);
-					// Move onto the next spline in the list.
+					SetTransforms(1);
+					// Move onto the next spline in the list if there are any more.
 					curSplineIndex++;
 					if (curSplineIndex < splines.Count)
 					{
 						curSpline = splines[curSplineIndex].GetComponent<SplineObj>();
-						transform.position = curSpline.CalcPosAtTime(0);
-						transform.eulerAngles = curSpline.CalcRotAtTime(0);
+						SetTransforms(0);
 						timer = new Timer(curSpline.time);
 					} else
 					{
-						done = true;
-						Debug.Log("Done!");
+						EndAnimation();
 					}
 				} else
 				{
-					transform.position = curSpline.CalcPosAtTime(timerVal);
-					transform.eulerAngles = curSpline.CalcRotAtTime(timerVal);
+					SetTransforms(timerVal);
 
 					Quaternion rot = new Quaternion();
 					rot.eulerAngles = transform.eulerAngles;
@@ -73,6 +78,26 @@ public class SplineTraveler : MonoBehaviour {
 					//Debug.Log(string.Format("Now Moving to t={0}, at location: {1} with rotation: {2}.", timerVal, transform.position, transform.eulerAngles));
 				}
 			}
+		}
+	}
+
+	void SetTransforms(float t)
+	{
+		transform.position = curSpline.CalcPosAtTime(t, approx, preCalculateBSpline);
+		transform.eulerAngles = curSpline.CalcRotAtTime(t);
+	}
+
+	void EndAnimation()
+	{
+		if (approx)
+		{
+			done = true;
+			Debug.Log("Done with B-Spline!");
+		} else
+		{
+			Debug.Log("Done with Catmull-Rom Spline!");
+			approx = true;
+			StartAnimation();
 		}
 	}
 
@@ -127,7 +152,7 @@ public class SplineTraveler : MonoBehaviour {
 				spline.rots.Add(new Vector3(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2])));
 			}
 			GameObject splineObj = (GameObject) Instantiate(splineObjPrefab);
-			splineObj.GetComponent<SplineObj>().Initialize(spline, time);
+			splineObj.GetComponent<SplineObj>().Initialize(spline, time, preCalculateBSpline);
 			splines.Add (splineObj);
 		}
 		Debug.Log("Successfully read file!");
