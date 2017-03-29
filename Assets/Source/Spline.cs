@@ -29,11 +29,20 @@ public class Spline{
 
 	public void PreCalculateBSplinePos(float time)
 	{
-		bSplinePoss = new List<Vector3>();
-		for (int i = 0; i < 30 * time; i++)
+		if (SplineTraveler.bSplinePoss.Count != 0)
 		{
-			bSplinePoss.Add(ApproxPosAtTime(i / (30 * time), 2));
+			this.bSplinePoss = SplineTraveler.bSplinePoss;
+		} else
+		{
+			bSplinePoss = new List<Vector3>();
+			for (int i = 0; i <= (20 * time); i++)
+			{
+				// i = [0, 20 * time] with one step for each frame
+				bSplinePoss.Add(ApproxPosAtTime(i / (20 * time), 2));
+			}
 		}
+		SplineTraveler.bSplinePoss = bSplinePoss;
+		Debug.Log("Done Calculating BSpline Positions!");
 	}
 
 	public void CalcQuaternions()
@@ -140,7 +149,7 @@ public class Spline{
 
 	public float Basis(ref List<int> t, int i, int k, float x)
 	{
-		Debug.Log(string.Format("Basis(i={0}, k={1}, x={2}))\nMax Knot Vector Index: {3}\nMin Knot Vector Index: {4}", i, k, x, (i + k + 1), i));
+		//Debug.Log(string.Format("Basis(i={0}, k={1}, x={2}))\nMax Knot Vector Index: {3}\nMin Knot Vector Index: {4}", i, k, x, (i + k + 1), i));
 		if (k <= 0)
 		{
 			if (x >= t[i] && x < t[i + 1])
@@ -155,18 +164,6 @@ public class Spline{
 			return (((x - t[i]) / (t[i + k] - t[i])) * Basis(ref t, i, k - 1, x)) + (((t[i + k + 1] - x) / (t[i + k + 1] - t[i + 1])) * Basis(ref t, i + 1, k - 1, x));
 		}
 	}
-
-//	public Vector3 CalcPosAlongBSpline(int i, float u)
-//	{
-//		float u2 = u * u;
-//		float u3 = u * u * u;
-//		Vector3 p0 = poss[i];
-//		Vector3 p1 = poss[i + 1];
-//		Vector3 p2 = poss[i + 2];
-//		Vector3 p3 = poss[i + 3];
-//
-//		return (p0 * (-u3 + (3 * u2) - (3 * u) + 1) + p1 * ((3 * u3) - (6 * u2) + 4) + p2 * ((-3 * u3) + (3 * u2) + (3 * u) + 1) + (p3 * u3)) / 6;
-//	}
 
 	public Vector3 CalcRotAtTime(float t)
 	{

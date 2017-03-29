@@ -32,7 +32,7 @@ public class SplineObj : MonoBehaviour {
 		{
 			if (pre)
 			{
-				return spline.bSplinePoss[(int)(t * 30 * time)];
+				return spline.bSplinePoss[(int)(t * 20 * time)];
 			} else
 			{
 				return spline.ApproxPosAtTime(t, 2);

@@ -2,11 +2,11 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Source\SplineTraveler.cs">
     <Files>
-      <File FileName="Assets\Source\Spline.cs" Line="70" Column="72" />
-      <File FileName="Assets\Source\SplineTraveler.cs" Line="53" Column="55" />
-      <File FileName="Assets\Source\SplineObj.cs" Line="34" Column="13" />
-      <File FileName="Assets\Source\Timer.cs" Line="16" Column="25" />
-      <File FileName="Assets\Source\MyQuaternion.cs" Line="38" Column="22" />
+      <File FileName="Assets\Source\Spline.cs" Line="184" Column="19" />
+      <File FileName="Assets\Source\SplineTraveler.cs" Line="16" Column="64" />
+      <File FileName="Assets\Source\SplineObj.cs" Line="29" Column="2" />
+      <File FileName="Assets\Source\Timer.cs" Line="26" Column="5" />
+      <File FileName="Assets\Source\MyQuaternion.cs" Line="171" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

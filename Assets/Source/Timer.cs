@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Timer
 {
-	const float interval = 1/30; // The time in seconds between redraws. 1/30th of a second for this animation
+	const float interval = 1/20; // The time in seconds between redraws. 1/20th of a second for this animation
 	float time; // The total time that the motion takes.
 	float startTime; // The time when this timer was created.
 	float nextTime; // The next time that an update must be drawn.

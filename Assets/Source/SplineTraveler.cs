@@ -12,6 +12,7 @@ public class SplineTraveler : MonoBehaviour {
 	public string filePath; // The filepath to the spline data.
 	static string currentFilePath; // Tracker so that the program recalculates when a new file is selected.
 	static List<GameObject> splines; // The splines described in the text file.
+	static public List<Vector3> bSplinePoss;
 	List<string> strData; // The strings of data in the text file.
 	int strDataIter; // An iterator for cycling through the lines of the text file.
 
@@ -20,13 +21,16 @@ public class SplineTraveler : MonoBehaviour {
 
 	Timer timer;
 	bool done = false;
-	bool approx = true; // Flag for whether or not the traveler has done the b-spline pass.
+	bool approx = false; // Flag for whether or not the traveler has done the b-spline pass.
 
 	// Use this for initialization
 	void Start () {
 		if (filePath != currentFilePath)
 		{
 			ReadFile();
+		} else
+		{
+			Debug.Log("File already read!");
 		}
 		if (splines.Count > 0)
 		{
@@ -104,6 +108,7 @@ public class SplineTraveler : MonoBehaviour {
 	// Read data from a new file
 	void ReadFile () {
 		Debug.Log(string.Format("Reading data from {0}", filePath));
+		bSplinePoss = new List<Vector3>();
 
 		// Check to see if file exists
 		if (!System.IO.File.Exists(@filePath))
